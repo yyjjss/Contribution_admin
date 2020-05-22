@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="admin">
+
+    <!-- Q&A 리스트 -->
+	<select id="qAndaList" resultType="admin.model.adminQandADto">
+		select q.board_idx,u.nickname,q.subject,q.register_date,q.status_id from users u,question_boards q where u.user_idx=q.user_idx and q.board_idx;
+	</select>
+
+    <!-- Q&A 상세글 -->
+	<select id="qAndaContent" resultType="admin.model.adminQandADto">
+		select * from
+		question_boards q,users u
+		where u.user_idx=q.user_idx and board_idx=#{board_idx}
+	</select>
+
+	<!-- Q&A 답변 -->
+	<update id="qAndaUpdate">
+		update question_boards set
+		answer=#{answer},status_id=#{status_id}
+		where board_idx=#{board_idx}
+	</update>
+
+	<!-- 공지사항 리스트 -->
+	<select id="notice" resultType="admin.model.adminNoticeDto">
+		select * from notices;
+	</select>
+
+    <!-- 공지사항 추가 -->
+	<insert id="noticeInsert">
+		insert into
+		notices(subject,content,register_date)
+		values(#{subject},#{content},now())
+	</insert>
+	
+	 <!-- 공지사항 상세글 -->
+	<select id="noticeContent" resultType="admin.model.adminNoticeDto">
+		select * from
+		notices
+		where notice_idx=#{notice_idx}
+	</select>
+	
+	<!-- 공지사항 삭제 -->
+    <delete id="noticeDelete">
+      delete from notices where notice_idx=#{notice_idx}
+    </delete>
+    
+    <!-- 공지사항 수정 -->
+    <update id="noticeUpdate">
+     update notices set subject=#{subject},content=#{content},register_date=now() where notice_idx=#{notice_idx}
+    </update>
+    
+    <!-- 관리자용 신청프로그램리스트 -->
+	<select id = "selectAllRequestProgramList" resultType="admin.model.ProgramDto">
+		select program_id, program_subject, start_date, end_date, approval_date, approval_flg, organization_id from programs;
+	</select>
+
+	<select id = "selectProgram" parameterType="map" resultType="admin.model.ProgramDto">
+		select * from programs where organization_id = #{organization_id} AND program_id = #{program_id}
+	</select>
+	
+	<select id = "selectType" resultType = "String" parameterType="int">
+		select type from types where type_id = #{type_id}
+	</select>
+	
+	<!-- 관리자용 승인 수정 -->
+	<update id="updateApprovalFlg" parameterType="map">
+		update programs set approval_flg = #{approval_flg}, approval_date=#{approval_date} where program_id = #{program_id} AND organization_id = #{organization_id}
+	</update>
+	
+	<!-- 프로그램의 모든 이미지 -->
+	<select id = "selectProgramImages" parameterType = "map" resultType = "String">
+		select stored_file_name from program_images where program_id = #{program_id} and organization_id = #{organization_id}
+	</select>
+	
+	<!--개인회원 리스트  -->
+	<select id = "userList" resultType = "admin.model.UserDto">
+		select user_type_id, user_id, name, nickname, grade, register_date from users where user_type_id = 1 OR user_type_id = 3
+	</select>
+	<!--기부단체 회원 리스트 -->
+	<select id = "organizationList" resultType = "admin.model.OrganizationDto">
+		select o.organization_id, o.nanmmByNm, o.rprsntvNm, o.adres, o.hmpadres, u.user_type_id, u.user_id, u.register_date from organizations as o left join users as u on u.organization_id = o.organization_id and u.user_type_id = 2
+	</select>
+	
+	<!--로그인 체크 -->
+	<select id="loginCheck" parameterType="map" resultType="admin.model.UserDto">select * from users where user_id=#{user_id} and password=#{password}</select>
+
+</mapper>
